@@ -1,10 +1,11 @@
-import { users } from 'db/users';
+import { getUsers, createUser } from './models/User';
+
 import { IncomingMessage, ServerResponse } from 'http';
 export const defaultHandler = (
     request: IncomingMessage,
     response: ServerResponse
 ) => {
-    response.writeHead(200, {
+    response.writeHead(400, {
         'Content-Type': 'application/json',
     });
     response.write(
@@ -20,7 +21,7 @@ export const getHandler = (
     request: IncomingMessage,
     response: ServerResponse
 ) => {
-    const data = users;
+    const data = getUsers();
     response.writeHead(200, {
         'Content-Type': 'application/json',
     });
@@ -58,7 +59,7 @@ export const postHandler = (
         response.write(
             JSON.stringify({
                 message: 'POST succesfull',
-                data: objData,
+                data: createUser(objData),
             })
         );
         response.end();

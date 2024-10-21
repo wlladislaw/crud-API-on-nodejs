@@ -1,11 +1,6 @@
-export interface User {
-    id: string;
-    username: string;
-    age: number;
-    hobbies?: string[];
-}
+import { User } from '../types/index';
 
-export let users: User[] = [
+export let usersDB: User[] = [
     { id: '1', username: 'Kot', age: 23, hobbies: ['squash'] },
     { id: '2', username: 'Alli', age: 31 },
 ];

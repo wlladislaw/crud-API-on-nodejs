@@ -21,25 +21,27 @@ const server = http.createServer((request, response) => {
                     })
                 );
                 response.end();
+                break;
             }
             if (reqURL === '/users') {
                 getHandler(request, response);
+            } else {
+                defaultHandler(request, response);
             }
-            defaultHandler(request, response);
-            response.end();
+
             break;
         }
         case 'POST': {
             if (reqURL === '/users') {
                 postHandler(request, response);
+            } else {
+                defaultHandler(request, response);
             }
-            defaultHandler(request, response);
-            response.end();
+
             break;
         }
         default: {
             defaultHandler(request, response);
-            response.end();
         }
     }
 });
