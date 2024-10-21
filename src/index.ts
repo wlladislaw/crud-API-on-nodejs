@@ -7,13 +7,12 @@ import {
     getHandler,
     putHandler,
     deleteHandler,
-} from './controller.ts';
+} from './controller';
 
 dotenv.config();
 const PORT = process.env.PORT || 9777;
 
 const server = http.createServer((request, response) => {
-    const reqURL = request.url;
     const reqMethod = request.method;
 
     switch (reqMethod) {
@@ -22,12 +21,7 @@ const server = http.createServer((request, response) => {
             break;
         }
         case 'POST': {
-            if (reqURL === '/users') {
-                postHandler(request, response);
-            } else {
-                defaultHandler(request, response);
-            }
-
+            postHandler(request, response);
             break;
         }
         case 'PUT': {

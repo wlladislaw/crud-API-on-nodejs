@@ -11,15 +11,15 @@ export const defaultHandler = (
     request: IncomingMessage,
     response: ServerResponse
 ) => {
-    response.writeHead(400, {
+    response.writeHead(404, {
         'Content-Type': 'application/json',
     });
     response.write(
         JSON.stringify({
-            message: `Not found at ${request.url}`,
+            message: `Nothing found at ${request.url}`,
         })
     );
-    response.statusCode = 400;
+    response.statusCode = 404;
     response.end();
 };
 
@@ -29,20 +29,9 @@ export const getHandler = (
 ) => {
     const reqURL = request.url;
 
-    const userId = reqURL?.split('/')[2];
+    const userId = reqURL?.split('/')[3];
 
-    if (reqURL === '/') {
-        response.writeHead(200, {
-            'Content-Type': 'application/json',
-        });
-        response.write(
-            JSON.stringify({
-                message: 'GET Succesfull on NODE API',
-            })
-        );
-        response.end();
-    }
-    if (reqURL === '/users') {
+    if (reqURL === '/api/users') {
         const data = getUsers();
         response.writeHead(200, {
             'Content-Type': 'application/json',
@@ -121,8 +110,8 @@ export const postHandler = (
 
             response.end();
         } catch (e) {
-            response.writeHead(400, { 'Content-Type': 'text/plain' });
-            response.end('invalid request');
+            response.writeHead(500, { 'Content-Type': 'text/plain' });
+            response.end('server error');
         }
         return;
     });
@@ -133,67 +122,76 @@ export const putHandler = (
     response: ServerResponse
 ) => {
     const reqURL = request.url;
-
-    const userId = reqURL?.split('/')[2];
-    if (userId) {
-        if (!uuidValidate(userId)) {
-            response.writeHead(400, { 'Content-Type': 'text/plain' });
-            response.end(' userId is invalid (not uuid)');
-            return;
-        }
-    }
-
-    let chunks: any = [];
-    request.on('data', (chunk) => {
-        chunks.push(chunk);
-    });
-    request.on('end', () => {
-        const data = Buffer.concat(chunks);
-
-        const stringData = data.toString();
-        const parsedData = new URLSearchParams(stringData);
-
-        const objData: any = {};
-        for (let key of parsedData.entries()) {
-            objData[key[0]] = key[1];
-        }
-
-        try {
-            const { username, age, hobbies } = objData;
-
-            if (
-                !username.trim() ||
-                typeof Number(age) !== 'number' ||
-                !hobbies.trim() ||
-                !age.trim()
-            ) {
+    const userId = reqURL?.split('/')[3];
+    if (reqURL?.startsWith('/api/users/') && userId) {
+        if (userId) {
+            if (!uuidValidate(userId)) {
                 response.writeHead(400, { 'Content-Type': 'text/plain' });
-                response.end('request body does not contain required fields');
+                response.end(' userId is invalid (not uuid)');
                 return;
             }
-            if (userId) {
-                const upUser = updateUser(
-                    userId,
-                    username,
-                    age,
-                    new Array(hobbies)
-                );
-                if (!upUser) {
-                    response.writeHead(404, { 'Content-Type': 'text/plain' });
-                    response.end('user not found');
+        }
+
+        let chunks: any = [];
+        request.on('data', (chunk) => {
+            chunks.push(chunk);
+        });
+        request.on('end', () => {
+            const data = Buffer.concat(chunks);
+
+            const stringData = data.toString();
+            const parsedData = new URLSearchParams(stringData);
+
+            const objData: any = {};
+            for (let key of parsedData.entries()) {
+                objData[key[0]] = key[1];
+            }
+
+            try {
+                const { username, age, hobbies } = objData;
+
+                if (
+                    !username.trim() ||
+                    typeof Number(age) !== 'number' ||
+                    !hobbies.trim() ||
+                    !age.trim()
+                ) {
+                    response.writeHead(400, { 'Content-Type': 'text/plain' });
+                    response.end(
+                        'request body does not contain required fields'
+                    );
                     return;
                 }
+                if (userId) {
+                    const upUser = updateUser(
+                        userId,
+                        username,
+                        age,
+                        new Array(hobbies)
+                    );
+                    if (!upUser) {
+                        response.writeHead(404, {
+                            'Content-Type': 'text/plain',
+                        });
+                        response.end('user not found');
+                        return;
+                    }
 
-                response.writeHead(200, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify(upUser));
+                    response.writeHead(200, {
+                        'Content-Type': 'application/json',
+                    });
+                    response.end(JSON.stringify(upUser));
+                }
+                return;
+            } catch (e) {
+                response.writeHead(500, { 'Content-Type': 'text/plain' });
+                response.end('server error');
             }
             return;
-        } catch (e) {
-            response.writeHead(400, { 'Content-Type': 'text/plain' });
-            response.end('invalid request');
-        }
-        return;
-    });
+        });
+    } else {
+        defaultHandler(request, response);
+    }
 };
 
 export const deleteHandler = (
@@ -202,26 +200,27 @@ export const deleteHandler = (
 ) => {
     const reqURL = request.url;
 
-    const userId = reqURL?.split('/')[2];
-    if (userId) {
-        if (!uuidValidate(userId)) {
-            response.writeHead(400, { 'Content-Type': 'text/plain' });
-            response.end(' userId is invalid (not uuid)');
-            return;
+    const userId = reqURL?.split('/')[3];
+    if (reqURL?.startsWith('/api/users/') && userId) {
+        if (userId) {
+            if (!uuidValidate(userId)) {
+                response.writeHead(400, { 'Content-Type': 'text/plain' });
+                response.end(' userId is invalid (not uuid)');
+                return;
+            }
         }
-    }
-    if (userId) {
-        const res = deleteUser(userId);
-        if (!res) {
-            response.writeHead(404, { 'Content-Type': 'text/plain' });
-            response.end("id === userId doesn't exist");
-            return;
-        }
+        if (userId) {
+            const res = deleteUser(userId);
+            if (!res) {
+                response.writeHead(404, { 'Content-Type': 'text/plain' });
+                response.end("id === userId doesn't exist");
+                return;
+            }
 
-        response.writeHead(204, { 'Content-Type': 'text/plain' });
-        response.end('user deleted');
+            response.writeHead(204, { 'Content-Type': 'text/plain' });
+            response.end('user deleted');
+        }
     } else {
         defaultHandler(request, response);
     }
-    return;
 };

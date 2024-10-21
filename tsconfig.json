@@ -1,27 +1,18 @@
 {
-    "compilerOptions": {
-        "baseUrl": "src",
-        "target": "ES2022",
-        "useDefineForClassFields": true,
-        "lib": ["ESNext"],
-        "module": "CommonJS",
-        "skipLibCheck": true,
-        "moduleResolution": "node",
-        "allowImportingTsExtensions": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "noEmit": true,
-        "strict": true,
-        "noUnusedLocals": true,
-        "noFallthroughCasesInSwitch": true,
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-    },
-    "include": [
-        "src",
-        "types",
-        "./*.ts",
-    ],
-    "exclude": ["node_modules"]
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES6",
+
+    "rootDir": "./src",
+    "esModuleInterop": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "types": ["node", "jest"]
+  },
+  "include": ["src",  "tests/**/*"],
+  "exclude": ["node_modules"]
 }
