@@ -3,6 +3,7 @@
 ## Install
 
 git clone repo
+git checkout develop
 open project and in root do npm install
 
 add .env file in root folder
